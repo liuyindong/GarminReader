@@ -19,7 +19,11 @@ import dk.itu.haas.GPS.IDate;
 import dk.itu.haas.GPS.IGPSlistener;
 import dk.itu.haas.GPS.IPosition;
 import dk.itu.haas.GPS.ITime;
+import dk.itu.haas.GPS.IWaypoint;
+import dk.itu.haas.GPS.IWaypointListener;
 import dk.itu.haas.GPS.Garmin.GarminGPS;
+import dk.itu.haas.GPS.Garmin.GarminListener;
+import dk.itu.haas.GPS.Garmin.GarminPacket;
 
 public class GarminReader implements IGPSlistener {
 	
@@ -62,14 +66,15 @@ public class GarminReader implements IGPSlistener {
 	}
 
 	public void positionReceived(IPosition arg0) {
-		System.out.println(arg0.getLatitude() + " " + arg0.getLongitude());
+		System.out.print(this.format.format(cal.getTime()));
+		System.out.println(" " + arg0.getLatitude() + " " + arg0.getLongitude());
+		
 	}
 
 	public void timeReceived(ITime arg0) {
 		cal.set(Calendar.HOUR_OF_DAY, arg0.getHours());
 		cal.set(Calendar.MINUTE, arg0.getMinutes());
 		cal.set(Calendar.SECOND, arg0.getSeconds());
-        System.out.println(this.format.format(cal.getTime()));
 	}
 
 }
