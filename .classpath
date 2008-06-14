@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/commapi/comm.jar"/>
+	<classpathentry kind="lib" path="lib/commapi/comm.jar" sourcepath="lib/commapi/javadocs"/>
+	<classpathentry kind="lib" path="lib/gps.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
