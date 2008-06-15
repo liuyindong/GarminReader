@@ -64,7 +64,8 @@ public class GarminGPS extends GPS implements Runnable {
 	/** This method is listening for input from the GPS. */ 
 	public void run() {
 		GarminPacket pack = null;		
-
+		int id = 0;
+		
 		while (active) {
 			try {
 				if (input.available() == 0) {
@@ -73,29 +74,37 @@ public class GarminGPS extends GPS implements Runnable {
 					} catch(InterruptedException e) {}
 					continue;
 				}
-				pack = new GarminPacket(input.readPacket());				
+				//System.out.println(input.available());
+				pack = new GarminPacket(input.readPacket(), true);
+				id = pack.getID();
+				//System.out.println("Pack: " + pack);
 			} catch (IOException e) {
 				active = false;				
 				return;
 			} catch (InvalidPacketException e) {
 				// Send back a NAK-packet.
-				try {
-					output.write( GarminPacket.createBasicPacket(GarminPacket.Pid_Nak_Byte, new int[] {pack.getID(), 0}));
-				} catch (IOException ex) {
-					active = false;
-					return;
-				}
+				//try {
+				//	System.out.println("Pack 1: " + pack);
+				//	//output.write( GarminPacket.createBasicPacket(GarminPacket.Pid_Nak_Byte, new int[] {pack.getID(), 0}));
+				//} catch (IOException ex) {
+				//	active = false;
+				//	return;
+				//}
+				System.out.println("Bad Packet Skipping");
+				pack = null;
 			}
 			
 			// Send back ACK-packet.
 			try {
-				output.write( GarminPacket.createBasicPacket(GarminPacket.Pid_Ack_Byte, new int[] {pack.getID(), 0}));
+				output.write( GarminPacket.createBasicPacket(GarminPacket.Pid_Ack_Byte, new int[] {id, 0}));
 			} catch (IOException e) {
 				active = false;
 			}
 
-			fireGarminPacket(pack);
-			Distribute(pack);
+			if(pack != null) {
+				fireGarminPacket(pack);
+				Distribute(pack);
+			}
 			
 		} // End of while
 	}

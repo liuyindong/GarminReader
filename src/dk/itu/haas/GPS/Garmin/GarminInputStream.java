@@ -33,6 +33,7 @@ public class GarminInputStream extends FilterInputStream {
 		c = read();
 		
 		if (c != GarminPacket.DLE) {
+			System.out.println(c);
 			throw (new InvalidPacketException( new int[] { GarminPacket.DLE }, 0));
 		}
 				
