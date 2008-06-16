@@ -4,8 +4,6 @@ package net.nilosplace.GarminReader;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -15,25 +13,19 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import javax.comm.CommPortIdentifier;
-import javax.comm.NoSuchPortException;
-import javax.comm.PortInUseException;
 import javax.comm.SerialPort;
-import javax.comm.UnsupportedCommOperationException;
 
 import dk.itu.haas.GPS.IDate;
 import dk.itu.haas.GPS.IGPSlistener;
 import dk.itu.haas.GPS.IPosition;
 import dk.itu.haas.GPS.ITime;
 import dk.itu.haas.GPS.Garmin.GarminGPS;
-import dk.itu.haas.GPS.Garmin.GarminListener;
-import dk.itu.haas.GPS.Garmin.GarminPacket;
 
 public class GarminReader implements IGPSlistener {
 	
 	private GregorianCalendar cal;
 	private SimpleDateFormat format;
-	private FileOutputStream fo;
-	private BufferedOutputStream bo;
+
 	
 	private BufferedWriter bw;
 	//private int lastSecond = -1;
@@ -46,7 +38,7 @@ public class GarminReader implements IGPSlistener {
         cal.setTimeZone(TimeZone.getTimeZone("GMT"));
         cal.set(Calendar.ZONE_OFFSET, 0);
         cal.set(Calendar.DST_OFFSET, 0);
-
+ 
 		try {
 			Calendar filecal = Calendar.getInstance();
 			String filename = filecal.getTime().toString().replaceAll(" ", "_").replaceAll(":", "_") + ".txt";
@@ -55,13 +47,14 @@ public class GarminReader implements IGPSlistener {
 			port = CommPortIdentifier.getPortIdentifier("COM3");
 			SerialPort port2 = (SerialPort)port.open("ComControl", 2000);
             port2.setSerialPortParams(9600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
-            port2.setDTR(false);
-            port2.setRTS(false);
+            port2.setDTR(true);
+            port2.setRTS(true);
 			GarminGPS gps = new GarminGPS(new BufferedInputStream(port2.getInputStream()), new BufferedOutputStream(port2.getOutputStream()));
 			gps.addGPSlistener(this);
 			//gps.addGarminListener(this);
             gps.setAutoTransmit(true);
             gps.requestDate();
+            gps.requestPosition();
             gps.run();
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -80,11 +73,11 @@ public class GarminReader implements IGPSlistener {
 
 	public void positionReceived(IPosition arg0) {
 		String out = this.format.format(cal.getTime());
-		out += " " + arg0.getLatitude() + " " + arg0.getLongitude();
+		out += " " + arg0.getLatitude() + " " + arg0.getLongitude() + " " + (arg0.getAltitude() * 3.2808399);
 		System.out.println(out);
+
 		try {
 			bw.write(out + "\r\n");
-
 			bw.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
