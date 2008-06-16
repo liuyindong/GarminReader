@@ -119,4 +119,8 @@ public class WaypointDataPacket extends GarminPacket implements IWaypoint{
 	public String getName() {
 		return name;
 	}
+
+	public float getAltitude() {
+		return alt;
+	}
 }

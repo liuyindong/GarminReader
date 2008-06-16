@@ -98,5 +98,9 @@ public class PVTDataPacket extends GarminPacket implements IPosition, ITime {
 	*/
 	public PositionRadians getLongitude() {
 		return lon;
+	}
+
+	public float getAltitude() {
+		return alt;
 	}	
 }

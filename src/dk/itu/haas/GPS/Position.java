@@ -6,20 +6,22 @@ package dk.itu.haas.GPS;
 
 public class Position implements IPosition {
 	private PositionRadians lat, lon;
+	private float alt;
 	
 	/**
 	* Makes a new position. Initializes the latitude and the longitude to 0.
 	*/
 	public Position() {
-		this(0,0);
+		this(0,0,0);
 	}
 	
 	/** 
 	* Initializes the Position with la as the latitude and lo as the longitude.
 	*/
-	public Position(double la, double lo) {
+	public Position(double la, double lo, float al) {
 		lat = new PositionRadians(la);
 		lon = new PositionRadians(lo);
+		alt = al;
 	}
 	
 	/**
@@ -56,5 +58,10 @@ public class Position implements IPosition {
 	*/
 	public PositionRadians getLongitude() {
 		return lon;
+	}
+
+	public float getAltitude() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

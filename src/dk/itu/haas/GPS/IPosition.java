@@ -13,4 +13,9 @@ public interface IPosition {
 	* This method returns the longitude of the position.
 	*/
 	public PositionRadians getLongitude();
+	
+	/**
+	 * This method returns the altitude of the position.
+	 */
+	public float getAltitude();
 };

@@ -56,4 +56,8 @@ public class PositionDataPacket extends GarminPacket implements IPosition{
 		res.append("\nLongitude: " + lon.toString());		
 		return res.toString();
 	}
+
+	public float getAltitude() {
+		return 0;
+	}
 }
