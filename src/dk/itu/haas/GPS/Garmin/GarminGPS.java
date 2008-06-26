@@ -65,6 +65,7 @@ public class GarminGPS extends GPS implements Runnable {
 	public void run() {
 		GarminPacket pack = null;		
 		int id = 0;
+		int errorcount = 0;
 		
 		while (active) {
 			try {
@@ -74,39 +75,26 @@ public class GarminGPS extends GPS implements Runnable {
 					} catch(InterruptedException e) {}
 					continue;
 				}
-				//System.out.println(input.available());
 				pack = new GarminPacket(input.readPacket(), true);
 				id = pack.getID();
-				//System.out.println("Pack: " + pack);
+				errorcount = 0;
+				//System.out.println("Do we get to this code?");
+				output.write( GarminPacket.createBasicPacket(GarminPacket.Pid_Ack_Byte, new int[] {id, 0}));
+				fireGarminPacket(pack);
+				Distribute(pack);
 			} catch (IOException e) {
 				active = false;				
 				return;
 			} catch (InvalidPacketException e) {
-				// Send back a NAK-packet.
-				//try {
-				//	System.out.println("Pack 1: " + pack);
-				//	//output.write( GarminPacket.createBasicPacket(GarminPacket.Pid_Nak_Byte, new int[] {pack.getID(), 0}));
-				//} catch (IOException ex) {
-				//	active = false;
-				//	return;
-				//}
-				System.out.println("Bad Packet Skipping");
-				pack = null;
-			}
-			
-			// Send back ACK-packet.
-			try {
-				output.write( GarminPacket.createBasicPacket(GarminPacket.Pid_Ack_Byte, new int[] {id, 0}));
-			} catch (IOException e) {
-				active = false;
-			}
-
-			if(pack != null) {
-				fireGarminPacket(pack);
-				Distribute(pack);
-			}
-			
-		} // End of while
+				errorcount++;
+				if(errorcount > 256) {
+					System.out.println("Too much bad data: ");
+					//System.out.println(pack.getRawPacket());
+					e.printStackTrace();
+					errorcount = 0;
+				}
+			}	
+		}
 	}
 	
 	/** This method is used to identify the type of packet received, and distribute it to the correct 
@@ -137,7 +125,7 @@ public class GarminGPS extends GPS implements Runnable {
 				fireTransferComplete();
 				return;
 			case GarminPacket.Pid_Product_Data :
-				System.out.println("Product data arrived!");
+				//System.out.println("Product data arrived!");
 				ProductDataPacket pp = new ProductDataPacket(p);
 				description = pp.getDescription();
 				description += "\nSoftware version: " + pp.getSWVersion();

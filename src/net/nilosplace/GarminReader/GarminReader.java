@@ -42,9 +42,9 @@ public class GarminReader implements IGPSlistener {
 		try {
 			Calendar filecal = Calendar.getInstance();
 			String filename = filecal.getTime().toString().replaceAll(" ", "_").replaceAll(":", "_") + ".txt";
-			FileWriter fw = new FileWriter(filename);
+			FileWriter fw = new FileWriter("files/" + filename);
 	        bw = new BufferedWriter(fw);
-			port = CommPortIdentifier.getPortIdentifier("COM3");
+			port = CommPortIdentifier.getPortIdentifier("COM6");
 			SerialPort port2 = (SerialPort)port.open("ComControl", 2000);
             port2.setSerialPortParams(9600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
             port2.setDTR(true);

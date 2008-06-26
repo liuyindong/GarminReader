@@ -77,7 +77,7 @@ public class GarminPacket {
 	
 	public GarminPacket(int[] p, boolean calcChecksum) {
 		packet = (int[]) p.clone();
-		
+
 		if (calcChecksum) {
 			packet[packet.length - 3] = calcChecksum();
 		}
