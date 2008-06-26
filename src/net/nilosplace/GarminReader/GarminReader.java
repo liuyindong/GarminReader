@@ -3,8 +3,6 @@ package net.nilosplace.GarminReader;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
@@ -31,21 +29,17 @@ import dk.itu.haas.GPS.IPosition;
 import dk.itu.haas.GPS.ITime;
 import dk.itu.haas.GPS.Garmin.GarminGPS;
 
-public class GarminReader extends Thread implements IGPSlistener {
+public class GarminReader implements IGPSlistener, Runnable {
 	
 	private GregorianCalendar cal;
 	private SimpleDateFormat format;
 	private int indent = 0;
 	GarminGPS gps;
 	JTextArea output;
-
-	
 	private BufferedWriter bw;
-	//private int lastSecond = -1;
-	//private int currentSecond = 0;
+	String commport = "COM3";
 	
 	public GarminReader() {
-		
         CommPortIdentifier port;
         format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         cal = new GregorianCalendar(new Locale("en"));
@@ -75,19 +69,16 @@ public class GarminReader extends Thread implements IGPSlistener {
 			FileWriter fw = new FileWriter("files/" + filename + ".gpx");
 	        bw = new BufferedWriter(fw);
 	        DoFileHeader();
-			port = CommPortIdentifier.getPortIdentifier("COM3");
+			port = CommPortIdentifier.getPortIdentifier(commport);
 			SerialPort port2 = (SerialPort)port.open("ComControl", 2000);
             port2.setSerialPortParams(9600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
             port2.setDTR(true);
             port2.setRTS(true);
 			gps = new GarminGPS(new BufferedInputStream(port2.getInputStream()), new BufferedOutputStream(port2.getOutputStream()));
 			gps.addGPSlistener(this);
-			//gps.addGarminListener(this);
             gps.setAutoTransmit(true);
             gps.requestDate();
             gps.requestPosition();
-            gps.run();
-            
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -125,8 +116,7 @@ public class GarminReader extends Thread implements IGPSlistener {
 
 	public static void main(String[] args) {
 		GarminReader reader = new GarminReader();
-		//Runtime.getRuntime().addShutdownHook(reader);
-		//reader.run();
+		reader.run();
     }
 
 	public void dateReceived(IDate arg0) {
@@ -171,15 +161,17 @@ public class GarminReader extends Thread implements IGPSlistener {
 			e.printStackTrace();
 		}
 	}
-	private void unindent() {
-		indent--;
-	}
-	private void indent() {
-		indent++;
-	}
+	
+	private void unindent() { indent--;	}
+	private void indent() {	indent++; }
+	
 	private void exitProcedure() {
 		gps.shutdown(false);
 		DoFileFooter();
 		System.exit(0);
+	}
+	
+	public void run() {
+		gps.run();
 	}
 }

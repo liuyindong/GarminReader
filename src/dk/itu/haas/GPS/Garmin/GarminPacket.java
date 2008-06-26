@@ -83,7 +83,6 @@ public class GarminPacket {
 		}
 		
 		if (isLegal() != -1) {
-			System.out.println("Error in byte: " + isLegal());
 			throw (new InvalidPacketException(p, isLegal()));
 		}
 	}
