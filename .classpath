@@ -3,5 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commapi/comm.jar" sourcepath="lib/commapi/javadocs"/>
+	<classpathentry kind="lib" path="lib/usb4java-0.5.0.jar"/>
+	<classpathentry kind="lib" path="lib/hidapi-1.1.jar" sourcepath="lib/hidapi-1.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/hidapi-1.1-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
