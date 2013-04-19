@@ -31,15 +31,18 @@ public class GPSReader {
 		
 		
 
-		try {
-			HIDManager manager = HIDManager.getInstance();
-			HIDDeviceInfo[] infos = manager.listDevices();
-			System.out.println(infos);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			HIDManager manager = HIDManager.getInstance();
+//			HIDDeviceInfo[] infos = manager.listDevices();
+//			System.out.println(infos);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+		USB_Device dev = findDevice(garminVender, garminProduct);
 
+		System.out.println(dev);
 		
 	}
 	
