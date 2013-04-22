@@ -40,84 +40,84 @@ public class GarminReader implements IGPSlistener, Runnable {
 	String commport = "COM3";
 	
 	public GarminReader() {
-        CommPortIdentifier port;
-        format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        cal = new GregorianCalendar(new Locale("en"));
-        cal.setTimeZone(TimeZone.getTimeZone("GMT"));
-        cal.set(Calendar.ZONE_OFFSET, 0);
-        cal.set(Calendar.DST_OFFSET, 0);
-        JFrame frame = new JFrame("Garmin Reader");
-        frame.setMinimumSize(new Dimension(500,600));
-        JLabel label = new JLabel("Test Label");
-        frame.getContentPane().add(label);
-        output = new JTextArea();
-        output.setAutoscrolls(true);
-        JScrollPane jscroll = new JScrollPane(output);
-        frame.getContentPane().add(jscroll, BorderLayout.CENTER);
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		CommPortIdentifier port;
+		format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+		cal = new GregorianCalendar(new Locale("en"));
+		cal.setTimeZone(TimeZone.getTimeZone("GMT"));
+		cal.set(Calendar.ZONE_OFFSET, 0);
+		cal.set(Calendar.DST_OFFSET, 0);
+		JFrame frame = new JFrame("Garmin Reader");
+		frame.setMinimumSize(new Dimension(500,600));
+		JLabel label = new JLabel("Test Label");
+		frame.getContentPane().add(label);
+		output = new JTextArea();
+		output.setAutoscrolls(true);
+		JScrollPane jscroll = new JScrollPane(output);
+		frame.getContentPane().add(jscroll, BorderLayout.CENTER);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-			    exitProcedure();
+				exitProcedure();
 			}
 		});
-        frame.pack();
-        frame.setVisible(true);
+		frame.pack();
+		frame.setVisible(true);
 
 		try {
 			Calendar filecal = Calendar.getInstance();
 			String filename = filecal.getTime().toString().replaceAll(" ", "_").replaceAll(":", "_");
 			FileWriter fw = new FileWriter("files/" + filename + ".gpx");
-	        bw = new BufferedWriter(fw);
-	        DoFileHeader();
+			bw = new BufferedWriter(fw);
+			DoFileHeader();
 			port = CommPortIdentifier.getPortIdentifier(commport);
 			SerialPort port2 = (SerialPort)port.open("ComControl", 2000);
-            port2.setSerialPortParams(9600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
-            port2.setDTR(true);
-            port2.setRTS(true);
+				port2.setSerialPortParams(9600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
+				port2.setDTR(true);
+				port2.setRTS(true);
 			gps = new GarminGPS(new BufferedInputStream(port2.getInputStream()), new BufferedOutputStream(port2.getOutputStream()));
 			gps.addGPSlistener(this);
-            gps.setAutoTransmit(true);
-            gps.requestDate();
-            gps.requestPosition();
+				gps.setAutoTransmit(true);
+				gps.requestDate();
+				gps.requestPosition();
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-    private void DoFileHeader() {
-    	write("<?xml version=\"1.0\" standalone=\"yes\"?>");
-    	write("<gpx");
-    	indent();
-    	write("xmlns=\"http://www.topografix.com/GPX/1/0\"");
-    	write("version=\"1.0\" creator=\"TopoFusion 3.15\"");
-    	write("xmlns:TopoFusion=\"http://www.TopoFusion.com\"");
-    	write("xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
-    	write("xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd http://www.TopoFusion.com http://www.TopoFusion.com/topofusion.xsd\">");
-    	write("<bounds maxlat=\"0.000000\" minlon=\"0.000000\" minlat=\"0.000000\" maxlon=\"0.000000\"/>");
-    	write("<trk>");
-    	indent();
-    	write("<trkseg>");
-    	indent();
+	private void DoFileHeader() {
+		write("<?xml version=\"1.0\" standalone=\"yes\"?>");
+		write("<gpx");
+		indent();
+		write("xmlns=\"http://www.topografix.com/GPX/1/0\"");
+		write("version=\"1.0\" creator=\"TopoFusion 3.15\"");
+		write("xmlns:TopoFusion=\"http://www.TopoFusion.com\"");
+		write("xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+		write("xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd http://www.TopoFusion.com http://www.TopoFusion.com/topofusion.xsd\">");
+		write("<bounds maxlat=\"0.000000\" minlon=\"0.000000\" minlat=\"0.000000\" maxlon=\"0.000000\"/>");
+		write("<trk>");
+		indent();
+		write("<trkseg>");
+		indent();
 	}
-    
-    private void DoFileFooter() {
-    	unindent();
-    	write("</trkseg>");
-    	unindent();
-    	write("</trk>");
-    	unindent();
-    	write("</gpx>");
-    	try {
+	
+	private void DoFileFooter() {
+		unindent();
+		write("</trkseg>");
+		unindent();
+		write("</trk>");
+		unindent();
+		write("</gpx>");
+		try {
 			bw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-    }
+	}
 
 	public static void main(String[] args) {
 		GarminReader reader = new GarminReader();
 		reader.run();
-    }
+	}
 
 	public void dateReceived(IDate arg0) {
 		cal.set(Calendar.YEAR, arg0.getYear());

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path=""/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/home/uter/workspace/jsr80-1.0.1.jar"/>
+	<classpathentry kind="lib" path="/home/uter/workspace/jsr80_linux-1.0.1.jar"/>
+	<classpathentry kind="lib" path="/home/uter/workspace/jsr80_ri-1.0.1.jar"/>
+	<classpathentry kind="output" path=""/>
+</classpath>
