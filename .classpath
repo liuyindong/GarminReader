@@ -2,9 +2,13 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/usb4java"/>
-	<classpathentry kind="lib" path="lib/usb4java-1.0.0-20130418.193619-63.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/usb4java">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/Users/oblodgett/git/usb4java/src/main/resources/de/ailis/usb4java/libusb/macosx-x86_64"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/commapi/comm.jar"/>
+	<classpathentry kind="lib" path="lib/usb4java-1.0.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 	<referencedentry kind="lib" path="lib/usb-1.0.2.jar" sourcepath="/usb4java"/>
 </classpath>

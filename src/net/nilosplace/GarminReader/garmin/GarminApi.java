@@ -5,52 +5,64 @@ import java.util.List;
 import javax.usb.UsbConfiguration;
 import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
+import javax.usb.UsbDisconnectedException;
 import javax.usb.UsbEndpoint;
 import javax.usb.UsbException;
 import javax.usb.UsbHostManager;
 import javax.usb.UsbHub;
 import javax.usb.UsbInterface;
 import javax.usb.UsbInterfacePolicy;
+import javax.usb.UsbNotActiveException;
+import javax.usb.UsbNotOpenException;
 import javax.usb.UsbServices;
 
-import net.nilosplace.GarminReader.garmin.queue.GarminInterruptQueue;
-import net.nilosplace.GarminReader.garmin.queue.GarminRecievingQueue;
-import net.nilosplace.GarminReader.garmin.queue.GarminSendingQueue;
+import net.nilosplace.GarminReader.garmin.util.GarminDevice;
+import net.nilosplace.GarminReader.garmin.util.GarminUSBController;
+import net.nilosplace.GarminReader.garmin.util.Packet;
 
 public class GarminApi {
 	
-	private UsbDevice garminDevice = null;
-	
-	private GarminSendingQueue send = null;
-	private GarminRecievingQueue read = null;
-	private GarminInterruptQueue rupt = null;
+	private GarminDevice garminDevice = null;
+	private GarminUSBController controller = null;
 
 	public GarminApi() {
 		try {
 			UsbServices services = UsbHostManager.getUsbServices();
 			
 			UsbHub roothub = services.getRootUsbHub();
-			GarminDevice device = findDevices(roothub, 0);
-			if(device != null) {
-				System.out.println("Device found: " + device);
-				initDevice(device);
+			
+			garminDevice = findDevices(roothub, 0);
+			
+			if(garminDevice != null) {
+				System.out.println("Device found: " + garminDevice);
+				initDevice(garminDevice);
 			} else {
 				System.out.println("Error Garmin Device Could not be found");
+				System.exit(0);
 			}
+			
+
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		} catch (UsbException e) {
 			e.printStackTrace();
 		}
 	}
-
+	
 	public GarminDevice findDevices(UsbHub hub, int level){
-		List<UsbDevice> Devices = hub.getAttachedUsbDevices();
-		System.out.println(hub);
-		for(UsbDevice device: Devices) {
-			System.out.println(device);
-			if (device.isUsbHub()) {
+		List<UsbDevice> devices = hub.getAttachedUsbDevices();
+		
+		for(UsbDevice device: devices) {
+			if(device.isUsbHub()) {
 				findDevices((UsbHub) device, level + 1);
+			}
+			
+			if (device.isUsbHub()) {
+				GarminDevice dev = findDevices((UsbHub) device, level + 1);
+				if(dev != null) {
+					//System.out.println(dev);
+					return dev;
+				}
 			} else{
 				UsbDeviceDescriptor descriptor = null;
 				try{
@@ -58,23 +70,26 @@ public class GarminApi {
 				}catch(Exception ex){
 					ex.printStackTrace();
 				}
-				//System.out.println(descriptor.idProduct());
-				//System.out.println(descriptor.idVendor());
 				
 				if (descriptor.idProduct() == GarminDevice.idProduct && descriptor.idVendor() == GarminDevice.idVendor) {
-					//return new GarminDevice(device);
+					return new GarminDevice(device);
 				}
 			}
 		}
 		return null;
 	}
 
-	public void initDevice(GarminDevice device){
-		try{
+	public void initDevice(GarminDevice device) throws UsbNotActiveException, UsbNotOpenException, UsbDisconnectedException, UsbException{
+		UsbEndpoint pipeInEndP = null;
+		UsbEndpoint pipeOutEndP = null;
+		UsbEndpoint pipeInterruptP = null;
+		UsbInterface interf = null;
+		
+		try {
 			device.getDevice().getActiveUsbConfiguration();
 			UsbConfiguration config = device.getDevice().getActiveUsbConfiguration();
 
-			UsbInterface interf = config.getUsbInterface((byte)0);
+			interf = config.getUsbInterface((byte)0);
 			interf.claim(new UsbInterfacePolicy() {
 				public boolean forceClaim(UsbInterface usbInterface) {
 					return true;
@@ -83,53 +98,76 @@ public class GarminApi {
 
 			List<UsbEndpoint> totalEndpoints = interf.getUsbEndpoints();
 			
-//			for(UsbEndpoint e: totalEndpoints) {
-//				System.out.println(e.getUsbEndpointDescriptor());
-//			}
+			pipeInEndP = (UsbEndpoint) totalEndpoints.get(GarminDevice.bulkIn);
+			pipeOutEndP = (UsbEndpoint) totalEndpoints.get(GarminDevice.bulkOut);
+			pipeInterruptP = (UsbEndpoint) totalEndpoints.get(GarminDevice.bulkInterrupt);
 			
-			UsbEndpoint pipeInEndP = (UsbEndpoint) totalEndpoints.get(GarminDevice.bulkIn);
-			UsbEndpoint pipeOutEndP = (UsbEndpoint) totalEndpoints.get(GarminDevice.bulkOut);
-			UsbEndpoint pipeInterruptP = (UsbEndpoint) totalEndpoints.get(GarminDevice.bulkInterrupt);
+			// Control = 0
+			// ISOCHRONOUS = 1
+			// Bulk = 2
+			// Interrupt = 3
+			//System.out.println(pipeInEndP.getType());
+			//System.out.println(pipeOutEndP.getType());
+			//System.out.println(pipeInterruptP.getType());
 			
-//			System.out.println(pipeInEndP.getType());
-//			System.out.println(pipeOutEndP.getType());
-//			System.out.println(pipeInterruptP.getType());
-//			
-//			System.out.println(pipeInEndP.getDirection());
-//			System.out.println(pipeOutEndP.getDirection());
-//			System.out.println(pipeInterruptP.getDirection());
+			// Out = 0
+			// In = -128
+			//System.out.println(pipeInEndP.getDirection());
+			//System.out.println(pipeOutEndP.getDirection());
+			//System.out.println(pipeInterruptP.getDirection());
 			
-			send = new GarminSendingQueue(pipeOutEndP);
-			read = new GarminRecievingQueue(pipeInEndP);
-			rupt = new GarminInterruptQueue(pipeInterruptP);
+			// All three are 64
+			//System.out.println(pipeInEndP.getUsbEndpointDescriptor().wMaxPacketSize());
+			//System.out.println(pipeOutEndP.getUsbEndpointDescriptor().wMaxPacketSize());
+			//System.out.println(pipeInterruptP.getUsbEndpointDescriptor().wMaxPacketSize());
 
 			
-		}catch(NullPointerException ex){
-			System.out.println("Null Pointer: " + ex.getMessage());
-			//ex.printStackTrace();
-			System.exit(0);
-			
-		} catch(Exception ex){
-			//ex.printStackTrace();
-			System.out.println(ex.getMessage());
+			controller = new GarminUSBController(pipeInEndP, pipeOutEndP, pipeInterruptP);
+
+
+		} catch(Exception ex) {
+			if(pipeInEndP != null) {
+				pipeInEndP.getUsbPipe().abortAllSubmissions();
+				pipeInEndP.getUsbPipe().close();
+			}
+			if(pipeOutEndP != null) {
+				pipeOutEndP.getUsbPipe().abortAllSubmissions();
+				pipeOutEndP.getUsbPipe().close();
+			}
+			if(pipeInterruptP != null) {
+				pipeInterruptP.getUsbPipe().abortAllSubmissions();
+				pipeInterruptP.getUsbPipe().close();
+			}
+			if(interf != null) {
+				interf.release();
+			}
+			ex.printStackTrace();
 			System.exit(0);
 		}
 	}
-		
-	public void send(Packet packet){
-		send.send(packet.createPacket());
+
+	public byte[] startSession() {
+		return controller.send(new Packet(Packet.Pid_Start_Session));
 	}
-	
-	public Packet recieve() {
-		return read.recieve();
+		
+	public byte[] getAllProductProtocolData() {
+		return controller.send(new Packet(Packet.Pid_Product_Rqst));
 	}
 
-	public void startSession() {
-		send(new Packet(Packet.Pid_Start_Session));
-	}
+	public void close() {
+		controller.close();
 		
-	public void getAllProductProtocolData(){
-		send(new Packet(Packet.Pid_Product_Rqst));
+	}
+
+	public void startPVTData() {
+		Packet p = new Packet(Packet.Pid_Command_Data);
+		
+		//controller.send(packet);
+		//sendRupt(new Packet(Packet.Cmnd_Start_Pvt_Data));
+	}
+	
+	public void stopPVTData() {
+		//sendRupt(new Packet(Packet.Cmnd_Stop_Pvt_Data));
 	}
 		
 //	public String getProductData(){
