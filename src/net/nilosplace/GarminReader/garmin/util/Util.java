@@ -102,14 +102,13 @@ public class Util {
 	}
 	
 	//Helps to print out the content of a ByteArray-packet 
-	static public void showByteCode(byte[] b) {
-		System.out.println("Debug-Information - ByteCode");
-		System.out.println("****************************************************");
+	static public void showByteCode(byte[] b, String message) {
+		System.out.println("*************************" + message + "*************************");
 		for (int i = 0; i < b[8]+12; i++) {
 			System.out.print("["+i+"]="+b[i] + " ");
 		}
 		System.out.println();
-		System.out.println("****************************************************");
+		System.out.println("*************************" + message + "*************************");
 	}
 	
 	//Helps to print out the content of a ByteArray-packet

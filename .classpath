@@ -8,7 +8,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/commapi/comm.jar"/>
-	<classpathentry kind="lib" path="lib/usb4java-1.0.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/usb4java-1.0.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/usb-1.0.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 	<referencedentry kind="lib" path="lib/usb-1.0.2.jar" sourcepath="/usb4java"/>
 </classpath>

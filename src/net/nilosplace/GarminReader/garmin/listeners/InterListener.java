@@ -15,7 +15,6 @@ public class InterListener implements UsbPipeListener {
 	}
 
 	public void dataEventOccurred(UsbPipeDataEvent event) {
-		//System.out.println("Inter Data Event");
 		garminUSBController.interDataEventOccurred(event);
 	}
 

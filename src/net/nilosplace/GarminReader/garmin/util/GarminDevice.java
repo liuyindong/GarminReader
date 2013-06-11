@@ -1,5 +1,6 @@
 package net.nilosplace.GarminReader.garmin.util;
-import javax.usb.*;
+
+import javax.usb.UsbDevice;
 
 public class GarminDevice {
 	

@@ -15,7 +15,6 @@ public class OutListener implements UsbPipeListener {
 	}
 
 	public void dataEventOccurred(UsbPipeDataEvent event) {
-		//System.out.println("Out Data Event");
 		garminUSBController.outDataEventOccurred(event);
 	}
 

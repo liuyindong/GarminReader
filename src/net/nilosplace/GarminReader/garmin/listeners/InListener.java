@@ -15,7 +15,6 @@ public class InListener implements UsbPipeListener {
 	}
 
 	public void dataEventOccurred(UsbPipeDataEvent event) {
-		//System.out.println("In Data Event");
 		garminUSBController.inDataEventOccurred(event);
 	}
 
